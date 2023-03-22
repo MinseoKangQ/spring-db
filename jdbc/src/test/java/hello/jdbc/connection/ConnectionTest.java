@@ -3,6 +3,7 @@ package hello.jdbc.connection;
 
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
@@ -16,20 +17,20 @@ import static hello.jdbc.connection.ConnectionConst.*;
 @Slf4j
 public class ConnectionTest {
 
-    @Test
-    void driverManager() throws SQLException {
-        Connection con1 = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-        Connection con2 = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-        log.info("connection={}, class={}", con1, con1.getClass());
-        log.info("connection={}, class={}", con2, con2,getClass());
-    }
-
-    @Test
-    void dataSourceDriverManager() throws SQLException {
-        // DriverManagerDataSource - 항상 새로운 커넥션 획득
-        DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
-        useDataSource(dataSource);
-    }
+//    @Test
+//    void driverManager() throws SQLException {
+//        Connection con1 = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+//        Connection con2 = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+//        log.info("connection={}, class={}", con1, con1.getClass());
+//        log.info("connection={}, class={}", con2, con2,getClass());
+//    }
+//
+//    @Test
+//    void dataSourceDriverManager() throws SQLException {
+//        // DriverManagerDataSource - 항상 새로운 커넥션 획득
+//        DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
+//        useDataSource(dataSource);
+//    }
 
     @Test
     void dataSourceConnectionPool() throws SQLException, InterruptedException {
@@ -43,6 +44,7 @@ public class ConnectionTest {
 
         useDataSource(dataSource);
         Thread.sleep(1000);
+
     }
 
     private void useDataSource(DataSource dataSource) throws SQLException {
@@ -51,5 +53,7 @@ public class ConnectionTest {
         log.info("--- useDataSource ---");
         log.info("connection={}, class={}", con1, con1.getClass());
         log.info("connection={}, class={}", con2, con2,getClass());
+        Assertions.assertThat(con1).isNotNull();
+        Assertions.assertThat(con2).isNotNull();
     }
 }
