@@ -17,20 +17,21 @@ import static hello.jdbc.connection.ConnectionConst.*;
 @Slf4j
 public class ConnectionTest {
 
-//    @Test
-//    void driverManager() throws SQLException {
-//        Connection con1 = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-//        Connection con2 = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-//        log.info("connection={}, class={}", con1, con1.getClass());
-//        log.info("connection={}, class={}", con2, con2,getClass());
-//    }
-//
-//    @Test
-//    void dataSourceDriverManager() throws SQLException {
-//        // DriverManagerDataSource - 항상 새로운 커넥션 획득
-//        DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
-//        useDataSource(dataSource);
-//    }
+    @Test
+    void driverManager() throws SQLException {
+        Connection con1 = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+        Connection con2 = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+        log.info("--- use DriverManager ---");
+        log.info("connection={}, class={}", con1, con1.getClass());
+        log.info("connection={}, class={}", con2, con2,getClass());
+    }
+
+    @Test
+    void dataSourceDriverManager() throws SQLException {
+        // DriverManagerDataSource - 항상 새로운 커넥션 획득
+        DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
+        useDataSource(dataSource);
+    }
 
     @Test
     void dataSourceConnectionPool() throws SQLException, InterruptedException {
@@ -50,7 +51,7 @@ public class ConnectionTest {
     private void useDataSource(DataSource dataSource) throws SQLException {
         Connection con1 = dataSource.getConnection();
         Connection con2 = dataSource.getConnection();
-        log.info("--- useDataSource ---");
+        log.info("--- use DriverManagerDataSource ---");
         log.info("connection={}, class={}", con1, con1.getClass());
         log.info("connection={}, class={}", con2, con2,getClass());
         Assertions.assertThat(con1).isNotNull();
