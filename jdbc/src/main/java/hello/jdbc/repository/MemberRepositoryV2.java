@@ -1,8 +1,7 @@
 package hello.jdbc.repository;
 
-// JDBC : DataSource 사용, JdbcUtils 사용
+// JDBC : Connection 을 파라미터로 넘기기
 
-import hello.jdbc.connection.DBConnectionUtil;
 import hello.jdbc.domain.Member;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -12,14 +11,78 @@ import java.sql.*;
 import java.util.NoSuchElementException;
 
 @Slf4j
-public class MemberRepositoryV1 {
+public class MemberRepositoryV2 {
 
     // DI 받아서 DataSource 사용
     private final DataSource dataSource;
 
-    public MemberRepositoryV1(DataSource dataSource) {
+    public MemberRepositoryV2(DataSource dataSource) {
         this.dataSource = dataSource;
     }
+
+    // newR -> 계좌이체 서비스 로직에서 호출하는 메서드
+    public Member findById(Connection con, String memberId) throws SQLException {
+
+        String sql = "select * from member where member_id = ?";
+
+        // Connection con = null; // 삭제
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            // con = getConnection(); // 삭제 (이것 사용하면 새로운 커넥션이 맺어짐)
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, memberId);
+
+            rs = pstmt.executeQuery(); // ResultSet 반환, 값을 꺼내야 함
+            if(rs.next()) { // next를 한 번은 호출해야 함, 데이터가 있는 경우
+                Member member = new Member();
+                member.setMemberId(rs.getString("member_id"));
+                member.setMoney(rs.getInt("money"));
+                return member;
+            }
+            else { // 데이터가 없는 경우
+                throw new NoSuchElementException("member not found memberId = " + memberId);
+            }
+
+        } catch (SQLException e) {
+            log.error("db error", e);
+            throw e;
+        } finally {
+            // *** connection 은 여기에서 닫지 않는다 ***
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(pstmt);
+            // JdbcUtils.closeConnection(con); // 서비스 계층에서 커넥션 종료해야 함
+        }
+    }
+
+    // newU -> 계좌이체 서비스 로직에서 호출하는 메서드
+    public void update(Connection con, String memberId, int money) throws SQLException {
+
+        String sql = "update member set money=? where member_id=?";
+
+        // Connection con = null; // 삭제
+        PreparedStatement pstmt = null;
+
+        try {
+            // con = getConnection(); // 삭제
+            pstmt = con.prepareStatement(sql);
+            pstmt.setInt(1, money);
+            pstmt.setString(2, memberId);
+            int resultSize = pstmt.executeUpdate();
+            log.info("resultSize={}", resultSize);
+        } catch (SQLException e) {
+            log.error("db error", e);
+            throw e;
+        } finally {
+            // *** connection 은 여기에서 닫지 않는다 ***
+            JdbcUtils.closeStatement(pstmt);
+            // JdbcUtils.closeConnection(con); // 서비스 계층에서 커넥션 종료해야 함
+        }
+    }
+
+
+
 
     // C
     public Member save(Member member) throws SQLException{
